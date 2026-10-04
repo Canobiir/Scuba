@@ -1,0 +1,6 @@
+.build/
+build/
+Builds.noindex/
+.DS_Store
+dev/*
+!dev/*.sh

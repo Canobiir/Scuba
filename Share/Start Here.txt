@@ -1,0 +1,158 @@
+WELCOME TO SCUBA  (test build)
+==============================
+
+Scuba lives in your menu bar (the ⊞ icon) and arranges your windows into
+pools. Any pool can open up into a whole desktop of its own, so instead
+of shuffling windows around one flat screen, you dive down into your work
+and come back up for air.
+
+This is an early test build, so a few things may be rough. Thanks for
+trying it!
+
+You need a Mac with Apple silicon (M1 or newer) on macOS 14 (Sonoma) or
+newer. A trackpad makes it a lot more fun.
+
+
+1. INSTALL
+----------
+1. Drag Scuba into your Applications folder.
+2. Double-click it. macOS will say it can't check the app for malware,
+   because test builds don't come from the App Store. Click Done.
+3. Open System Settings › Privacy & Security, scroll down, and click
+   "Open Anyway" next to the message about Scuba. Confirm with your
+   password or Touch ID.
+
+   If macOS says the app is "damaged", open Terminal, paste this line and
+   press Return, then open Scuba again:
+
+       xattr -dr com.apple.quarantine /Applications/Scuba.app
+
+
+2. PERMISSIONS
+--------------
+A Setup window opens the first time.
+
+- Accessibility (needed): click "Turn On…", then switch Scuba on in the list.
+  Scuba restarts by itself.
+- Screen Recording (optional): this only powers the smooth zoom animation.
+  Switch it on, then click "Restart App".
+- Your browser (later): the first time you save a pool with Safari or
+  Chrome in it, macOS asks whether Scuba may control that browser. Choose
+  Allow. That's how Scuba remembers your tabs. The tabs aren't saved that
+  first time, so save the pool again once you've allowed it.
+
+You can reopen Setup anytime from the ⊞ menu.
+
+
+3. ONE TRACKPAD SETTING
+-----------------------
+Scuba uses three-finger swipes, and so does macOS. Go to System Settings ›
+Trackpad › More Gestures and set "Swipe between full-screen applications"
+and "Mission Control" to four fingers. Then three fingers are Scuba's.
+
+
+4. SMALLER SCREENS (13" AND 14" MACBOOKS)
+-----------------------------------------
+Most apps won't shrink below a certain window size, so on a smaller
+screen, pools inside pools quickly get too small to hold real windows.
+Those windows show as portholes instead: a frosted picture of the
+window, cropped at its pool's edge. Click one to dive to its board, or
+Hyper + click it to blow the window up right where you are.
+
+To try portholes that show the whole window, shrunk and updating: ⊞ menu
+› Settings › Windows & pools › Windows too big for a nested pool ›
+Live portholes (BETA).
+
+For more room for real, usable windows, run your display at its highest
+resolution with BetterDisplay (github.com/waydabber/BetterDisplay).
+Everything on screen gets smaller, but nested pools fit more real
+windows. On a MacBook's built-in screen, the highest resolutions may
+need BetterDisplay Pro, which has a 14-day free trial.
+
+No install? System Settings › Displays › "More Space" gets you part of
+the way there.
+
+
+5. HOW TO SWIM
+--------------
+"Hyper" means holding Control + Option + Command together.
+
+Getting in and out
+  Hyper + ↑              Dive in from your normal desktop to Main
+  Hyper + Esc            Surface: back to your normal desktop, windows and all
+  Hyper + three fingers  Swipe up to go straight to your desktop from
+                         anywhere. Swipe down from your desktop to land
+                         on Main.
+
+Putting windows in pools
+  You start with two pools, side by side.
+  Open an app while you're inside, and its window joins the pool it opens over.
+  Or drag any window onto a pool. Drop it on the middle bar to fill the pool,
+  on an edge bar to make a new pool, or anywhere else to let it float there.
+  Hyper + 1, 2, 3 …      Put the window you're using into that pool
+
+Going deeper
+  Three fingers down     Dive into the pool under the pointer. It becomes a
+                         desktop of its own.
+  Three fingers up       Come back up a level (it stops at Main)
+  Three fingers left     Slide over to the next desktop on the same level.
+  or right               From Main, a fresh blank Main slides in, like a
+                         new Space. Put something in it and it stays.
+  (No trackpad? Hyper + scroll over a pool, and Hyper + ↓ to come back up.)
+
+Handy extras
+  Hold Hyper             See your pools and their names
+  Hyper + N              Add a pool
+  Hyper + B              Breathing room: an empty quarter of the screen in
+                         the corner nearest the pointer. Leave it empty and
+                         it folds away when you go back up.
+  Hyper + Shift + Delete Clear away every empty pool on this desktop
+  Hyper + O              A map of everything. Click to jump anywhere.
+  Hyper + Z              Undo the last layout change
+  Hyper + /              Show every shortcut
+
+
+6. HIDING, MOVING AND SAVING
+----------------------------
+Hiding things when you zoom out
+  Hyper + P              Hide the window under the pointer when you zoom
+                         out. From the desktop above it's gone and its
+                         neighbours spread out; dive back down and it's
+                         right there. Again shows it.
+  Hyper + Shift + P      The same for the whole pool under the pointer
+
+Moving a window anywhere
+  Hyper + X              Cut the window you're using. A chip at the bottom
+                         of the screen shows what you're holding.
+  Hyper + C              Copy it instead (pasted, it's in both pools)
+  Hyper + V              Go anywhere, point at a pool and paste it there
+
+Saving a pool for later (BETA)
+  Hyper + Shift + S      Save the pool under the pointer: its apps, where
+                         each window sits, and any pools inside it. Give it
+                         a name.
+  Hyper + Shift + W      Save it and close it. Its windows close, and apps
+                         left with no windows quit.
+  Hyper + Shift + O      Open a saved pool. Press Hyper + B, dive into the
+                         breathing room, point at it, press this and pick
+                         one from the list. Each app opens and its window
+                         lands where it was.
+
+  Browsers come back with their tabs. Other apps open a fresh window in the
+  right spot, but not the exact chat or document you had open. Apps that
+  only have one window (Discord, Messages) can't open a second one if
+  they're already open somewhere else.
+
+
+7. GETTING OUT
+--------------
+⊞ menu › Quit Scuba puts every window back where you can see it. If
+anything gets weird, quit and reopen it.
+
+
+8. TELL MICHAEL
+---------------
+- What felt confusing at first?
+- Did diving in feel like going *into* something?
+- Did saving a pool and opening it again bring everything back?
+- Anything that broke, and what you were doing when it happened.
