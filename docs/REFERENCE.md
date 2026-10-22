@@ -34,7 +34,7 @@ screenshots, start with the [user guide](USER_GUIDE.md).
 | Hyper + X / C / V | Cut / copy / paste a window, with its tabs |
 | Hyper + Shift + 1–9 | Save the view on screen |
 | Hyper + 1–9 | Go back to that saved view |
-| Hyper + P | Lock this board's placements: nothing docks, snaps or resizes, new windows float on top (again unlocks) |
+| Hyper + P | Lock this board's placements: nothing docks, snaps or resizes (again unlocks). Windows opened meanwhile float on top and stay with this board; point at one and press Hyper + P again to punch it into the tile under it as a tab |
 | Hyper + L | Lock the window under the pointer in place (again unlocks) |
 | Hyper + F | Frost or unfrost the tile under the pointer (unfrosting, the tiles around it make room) |
 | Hyper + Z | Undo the last layout change |
@@ -43,7 +43,7 @@ screenshots, start with the [user guide](USER_GUIDE.md).
 | Cmd + Option + ← / → | Back / forward through where you've been (the ‹ › arrows in the menu bar) |
 | Drag a gap's pill | Resize the tiles on either side |
 | Hyper + scroll, Hyper + pinch | Dive into / come back up from the pool under the pointer |
-| Hyper + click a window | Spotlight it; again to put it back |
+| Hold Hyper, click a pool's border and drag | Resize the pools on either side (reaches borders under windows too) |
 
 Everything else (the Overview, Home, naming, adding and deleting pools, tabs, saved pools, Spotlight, sending to your desktop) is in Scuba's menu bar menu. **Quick guide…** at the top of that menu walks through the basics.
 
@@ -323,8 +323,8 @@ cropped at its pool's edge, with its app's icon and name. Windows that fit
 stay real and usable.
 
 - **Click** a porthole to dive to its board, where the window is full size.
-- **Hyper + click** it to spotlight the window right where you are. Hyper +
-  click it again puts it back.
+- **Three-finger click** it to spotlight the window right where you are.
+  Again puts it back.
 - Under ⊞ → Settings → Windows & pools → **Windows too big for a nested
   pool**, choose frosted portholes (the default), live portholes (BETA) or
   none (windows spill over).

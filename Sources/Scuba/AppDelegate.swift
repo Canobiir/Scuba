@@ -312,8 +312,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         doubleClickDive.start()
         pinchZoom = PinchZoom(controller: active)
         pinchZoom.start()
+        // Hyper + click is for borders now (DividerDrag); Spotlight is a
+        // three-finger tap or a title-bar double-click.
         spotlightClick = SpotlightClick(controller: active)
-        spotlightClick.start()
         swipes = ThreeFingerSwipes(controller: active)
         swipes.start()
         launched = true
@@ -329,7 +330,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        for c in controllers.values { c.restoreAll() }
+        for c in controllers.values {
+            c.flushSave()
+            c.restoreAll()
+        }
     }
 
     private func pillClicked(_ id: String) {
@@ -513,14 +517,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     Hyper + H               hide the window under the pointer from the layer above (Shift: its whole pool)
     Hyper + X / C / V       cut / copy / paste a window, tabs and all
     Hyper + Shift + 1–9     save the view on screen   ·   Hyper + 1–9: back to it
-    Hyper + P               lock this board's placements (nothing docks, snaps or resizes)
+    Hyper + P               lock this board's placements (nothing docks, snaps or resizes;
+                            windows opened meanwhile float on top and stay with the board;
+                            Hyper + P on one of those punches it into the tile under it)
     Hyper + L               lock the window under the pointer in place
     Hyper + F               frost / unfrost the tile under the pointer
     Hyper + Z               undo
 
     Three fingers: down / up dive in / come back up · sideways: next board · click: Spotlight
     Pinch out / in on empty space: dive in / come back up
-    Drag a gap's pill to resize · drop a window on another's middle to tab it
+    Drag a gap's pill to resize, or hold Hyper and grab any border · drop a window on another's middle to tab it
     Cmd + Shift + drag a box: make those windows a room of their own
     Everything else is in the menu bar.
     """

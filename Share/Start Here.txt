@@ -1,4 +1,4 @@
-WELCOME TO SCUBA  (0.6 beta)
+WELCOME TO SCUBA  (0.7 beta)
 ============================
 
 Scuba lives in your menu bar (the ⊞ icon) and arranges your windows into
@@ -58,7 +58,10 @@ Most apps won't shrink below a certain window size, so on a smaller
 screen, pools inside pools quickly get too small to hold real windows.
 Those windows show as portholes instead: a frosted picture of the
 window, cropped at its pool's edge. Click one to dive to its board, or
-Hyper + click it to blow the window up right where you are.
+click it with three fingers to blow the window up right where you are.
+
+To resize pools, drag the pill in a gap, or hold Hyper and grab any
+border, even one a window is covering.
 
 To try portholes that show the whole window, shrunk and updating: ⊞ menu
 › Settings › Windows & pools › Windows too big for a nested pool ›
@@ -121,8 +124,12 @@ Moving a window anywhere (tabs come along)
   Hyper + V              Go anywhere, point at a pool and paste it there
 
 Locking
-  Hyper + P              Lock this board: nothing docks, snaps or resizes,
-                         and new windows float on top. Again unlocks.
+  Hyper + P              Lock this board: nothing docks, snaps or resizes.
+                         Windows you open meanwhile float on top, like a
+                         normal Mac desktop, and stay with this board.
+                         Point at one and press Hyper + P to punch it into
+                         the tile under it, as a tab.
+                         Again unlocks (the floating ones stay floating).
   Hyper + L              Lock the window under the pointer in place
 
 Saving a pool for later (BETA)

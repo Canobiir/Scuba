@@ -391,7 +391,7 @@ private struct GettingStartedView: View {
         Step(symbol: "rectangle.split.2x2", title: "Snap",
              detail: "Hyper + ← / → snaps the window you're using to that half. Then Hyper + ↑ / ↓ makes it the top or bottom quarter. Or drag a window by its title bar to an edge."),
         Step(symbol: "arrow.left.and.right", title: "Resize",
-             detail: "Drag the pill in the gap between two windows. A window too small to use frosts over and comes back when there's room; Hyper + F frosts or unfrosts one by hand."),
+             detail: "Drag the pill in the gap between two windows, or hold Hyper and grab any border (even under a window). A window too small to use frosts over and comes back when there's room; Hyper + F frosts or unfrosts one by hand."),
         Step(symbol: "rectangle.stack", title: "Tab",
              detail: "Drop a window on the middle of another and pause a moment. They share a strip of tabs."),
         Step(symbol: "square.dashed", title: "Breathing room",
@@ -403,7 +403,7 @@ private struct GettingStartedView: View {
         Step(symbol: "bookmark", title: "Save a view",
              detail: "Hyper + Shift + a number saves what's on screen. Hyper + that number comes straight back. ‹ › in the menu bar go back and forward through where you've been."),
         Step(symbol: "lock", title: "Lock",
-             detail: "Hyper + P locks this board's placements: nothing docks, snaps or resizes, and new windows float on top. Hyper + L locks the window under the pointer in place."),
+             detail: "Hyper + P locks this board's placements: nothing docks, snaps or resizes. Windows you open while it's locked float on top and stay with this board; point at one and press Hyper + P to punch it into the tile under it as a tab. Hyper + L locks the window under the pointer in place."),
     ]
 
     var body: some View {

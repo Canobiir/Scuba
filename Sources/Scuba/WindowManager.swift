@@ -30,33 +30,50 @@ final class WindowManager {
     /// Rebuilds the map of every standard window of every regular app.
     func refresh() {
         lastRefresh = Date()
-        let old = cache
-        cache.removeAll()
         let myPid = ProcessInfo.processInfo.processIdentifier
         let alone = WindowManager.leftAlone
-        for app in NSWorkspace.shared.runningApplications
-        where app.activationPolicy == .regular && app.processIdentifier != myPid
-            && !alone.contains(app.bundleIdentifier ?? "") {
-            let axApp = AXUIElementCreateApplication(app.processIdentifier)
+        let pids = NSWorkspace.shared.runningApplications
+            .filter { $0.activationPolicy == .regular && $0.processIdentifier != myPid
+                && !alone.contains($0.bundleIdentifier ?? "") }
+            .map { $0.processIdentifier }
+        // What we knew, by app: kept for an app too busy to answer.
+        var old: [pid_t: [CGWindowID: AXUIElement]] = [:]
+        for (id, e) in cache {
+            var pid: pid_t = 0
+            if AXUIElementGetPid(e, &pid) == .success { old[pid, default: [:]][id] = e }
+        }
+        // Every app is asked at once, so one slow app doesn't hold up the rest.
+        let lock = NSLock()
+        var found: [CGWindowID: AXUIElement] = [:]
+        DispatchQueue.concurrentPerform(iterations: pids.count) { i in
+            let pid = pids[i]
+            var mine: [CGWindowID: AXUIElement] = [:]
+            let axApp = AXUIElementCreateApplication(pid)
             var value: CFTypeRef?
             let result = AXUIElementCopyAttributeValue(axApp, kAXWindowsAttribute as CFString, &value)
             if result == .cannotComplete {
                 // The app is busy and didn't answer in time: its windows are
                 // still there, so keep what we knew rather than lose them.
-                for (id, e) in old {
-                    var pid: pid_t = 0
-                    if AXUIElementGetPid(e, &pid) == .success, pid == app.processIdentifier { cache[id] = e }
-                }
-                continue
-            }
-            guard result == .success, let windows = value as? [AXUIElement] else { continue }
-            for w in windows {
-                var id: CGWindowID = 0
-                if _AXUIElementGetWindow(w, &id) == .success, id != 0 {
-                    cache[id] = w
+                mine = old[pid] ?? [:]
+            } else if result == .success, let windows = value as? [AXUIElement] {
+                for w in windows {
+                    var id: CGWindowID = 0
+                    if _AXUIElementGetWindow(w, &id) == .success, id != 0 { mine[id] = w }
                 }
             }
+            guard !mine.isEmpty else { return }
+            lock.lock()
+            found.merge(mine) { a, _ in a }
+            lock.unlock()
         }
+        cache = found
+    }
+
+    /// The same, unless it was just done (a glide asks, then the layout it
+    /// plays asks again a moment later: once is enough).
+    func refreshIfStale(_ age: TimeInterval = 0.15) {
+        guard Date().timeIntervalSince(lastRefresh) > age else { return }
+        refresh()
     }
 
     func exists(_ id: CGWindowID) -> Bool { cache[id] != nil }
@@ -308,20 +325,110 @@ final class WindowManager {
     /// Moves and resizes a window to an AppKit-coordinate rectangle.
     func setFrame(_ id: CGWindowID, _ rect: CGRect) {
         guard let e = element(id) else { return }
+        let origin = axPoint(for: rect)
+        parked.remove(id)
+        lastTarget[id] = rect
+        liveSent[id] = nil
+        // In a layout: gathered, then sent to every app at once (endBatch).
+        if batch != nil {
+            batch?.append((id, e, rect, origin))
+            return
+        }
+        let r = place(e, origin: origin, size: rect.size)
+        settle(id, e, rect, origin: origin, moved: r.moved, restoring: r.restoring)
+    }
+
+    // MARK: Batched moves (a layout)
+    //
+    // A layout used to move windows one after another, each waiting on its
+    // app: one slow app (Music, an Electron app) held up every window after
+    // it. Now a layout gathers its moves, sends each app its own on that
+    // app's queue (the same queues live moves use, so they stay in order),
+    // all apps at once, and waits for them together: as long as the slowest
+    // app, not all of them added up. Every check is the same as before.
+
+    private var batch: [(id: CGWindowID, element: AXUIElement, rect: CGRect, origin: CGPoint)]?
+    private var batchDepth = 0
+
+    func beginBatch() {
+        batchDepth += 1
+        if batch == nil { batch = [] }
+    }
+
+    /// Sends the gathered moves and waits for them, never longer than a
+    /// moment: an app that's stuck finishes its own in the background.
+    func endBatch() {
+        batchDepth = max(0, batchDepth - 1)
+        guard batchDepth == 0, let jobs = batch else { return }
+        batch = nil
+        guard !jobs.isEmpty else { return }
+        var byApp: [pid_t: [(id: CGWindowID, element: AXUIElement, rect: CGRect, origin: CGPoint)]] = [:]
+        for j in jobs {
+            var pid: pid_t = 0
+            AXUIElementGetPid(j.element, &pid)
+            byApp[pid, default: []].append(j)
+        }
+        let group = DispatchGroup()
+        let lock = NSLock()
+        var finished: [(CGWindowID, AXUIElement, CGRect, CGPoint, Bool, Bool)] = []
+        var waiting = true
+        for (pid, list) in byApp {
+            liveQueue(for: pid).async(group: group) { [weak self] in
+                guard let self else { return }
+                for j in list {
+                    let r = self.place(j.element, origin: j.origin, size: j.rect.size)
+                    let item = (j.id, j.element, j.rect, j.origin, r.moved, r.restoring)
+                    lock.lock()
+                    let late = !waiting
+                    if !late { finished.append(item) }
+                    lock.unlock()
+                    // Finished after the layout stopped waiting: checked on its own.
+                    if late {
+                        DispatchQueue.main.async { [weak self] in
+                            self?.settle(item.0, item.1, item.2, origin: item.3, moved: item.4, restoring: item.5)
+                        }
+                    }
+                }
+            }
+        }
+        _ = group.wait(timeout: .now() + 1.2)
+        lock.lock()
+        waiting = false
+        let done = finished
+        lock.unlock()
+        for d in done { settle(d.0, d.1, d.2, origin: d.3, moved: d.4, restoring: d.5) }
+    }
+
+    /// Puts a window at a spot (any thread: Accessibility calls only).
+    /// `moved`: false when it was already there.
+    private func place(_ e: AXUIElement, origin: CGPoint, size: CGSize) -> (moved: Bool, restoring: Bool) {
         var minimized: CFTypeRef?
         var restoring = false
         if AXUIElementCopyAttributeValue(e, kAXMinimizedAttribute as CFString, &minimized) == .success,
            (minimized as? Bool) == true {
             AXUIElementSetAttributeValue(e, kAXMinimizedAttribute as CFString, kCFBooleanFalse)
             restoring = true
-            lastRestore = Date()
         }
-        let origin = axPoint(for: rect)
-        let target = CGRect(origin: origin, size: rect.size)
-        parked.remove(id)
-        lastTarget[id] = rect
-        liveSent[id] = nil
+        if !restoring, let now = currentFrame(e),
+           abs(now.minX - origin.x) < 2, abs(now.minY - origin.y) < 2,
+           abs(now.width - size.width) < 2, abs(now.height - size.height) < 2 {
+            return (false, false)
+        }
+        // Position, size, position again: some apps clamp size to the screen
+        // based on their old position, so the second move settles it.
+        setPosition(e, origin)
+        setSize(e, size)
+        setPosition(e, origin)
+        return (true, restoring)
+    }
+
+    /// After a window's been placed (main thread): one coming back from the
+    /// Dock is placed again once it's back, and a window that moved is
+    /// checked once it has settled, to learn if it refused to get that small.
+    private func settle(_ id: CGWindowID, _ e: AXUIElement, _ rect: CGRect, origin: CGPoint,
+                        moved: Bool, restoring: Bool) {
         if restoring {
+            lastRestore = Date()
             // Coming back from the Dock takes a moment, and a move made during
             // it can be lost: place it again once it's back (wherever it's
             // meant to be by then).
@@ -333,20 +440,37 @@ final class WindowManager {
                 self.setPosition(e, o)
             }
         }
-        if let now = currentFrame(e),
-           abs(now.minX - target.minX) < 2, abs(now.minY - target.minY) < 2,
-           abs(now.width - target.width) < 2, abs(now.height - target.height) < 2 {
-            return
-        }
-        // Position, size, position again: some apps clamp size to the screen
-        // based on their old position, so the second move settles it.
-        setPosition(e, origin)
-        setSize(e, rect.size)
-        setPosition(e, origin)
+        guard moved else { return }
         // Did it refuse to get that small? Many apps take a moment to resize,
         // so look again once it has settled (two looks that agree), rather
         // than mistaking a window that's still shrinking for one that won't.
         verifySize(id, e, rect, after: restoring ? 0.7 : 0.35)
+    }
+
+    /// Where several windows are, read from every app at once.
+    func frames(of ids: [CGWindowID]) -> [CGWindowID: CGRect] {
+        let top = primaryHeight
+        var byApp: [pid_t: [(CGWindowID, AXUIElement)]] = [:]
+        for id in ids {
+            guard let e = cache[id] else { continue }
+            var pid: pid_t = 0
+            AXUIElementGetPid(e, &pid)
+            byApp[pid, default: []].append((id, e))
+        }
+        let groups = Array(byApp.values)
+        let lock = NSLock()
+        var out: [CGWindowID: CGRect] = [:]
+        DispatchQueue.concurrentPerform(iterations: groups.count) { i in
+            var mine: [CGWindowID: CGRect] = [:]
+            for (id, e) in groups[i] {
+                guard let f = self.currentFrame(e) else { continue }
+                mine[id] = CGRect(x: f.minX, y: top - f.minY - f.height, width: f.width, height: f.height)
+            }
+            lock.lock()
+            out.merge(mine) { a, _ in a }
+            lock.unlock()
+        }
+        return out
     }
 
     // MARK: Live moves (while you drag an edge or a gap)

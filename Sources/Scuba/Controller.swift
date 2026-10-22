@@ -151,7 +151,7 @@ final class Controller {
     func letGo(of w: UInt32) {
         remove(window: w)
         if spotlit == w { spotlit = nil }
-        state.save(to: stateURL)
+        saveState()
     }
 
     var viewport: CGRect { screen.visibleFrame.insetBy(dx: gap / 2, dy: gap / 2) }
@@ -975,6 +975,11 @@ final class Controller {
     private var touched = Set<UInt32>()
 
     func noteManualChange(_ w: UInt32) {
+        // An outside window stays wherever you put it.
+        if isFloater(w) {
+            if let f = windows.frame(of: w) { floatFrames[w] = f }
+            return
+        }
         // Locked: dragged or resized by hand, it glides back to its tile.
         if !onSurface, liveIn[w] != nil, placementsLocked || isLocked(w) {
             lastApplied[w] = nil
@@ -1016,7 +1021,7 @@ final class Controller {
     func applyLayout() {
         planCache = nil
         noteHistory()
-        windows.refresh()
+        windows.refreshIfStale()
         for main in allMains {
             forEachPanel(main) { p in
                 // Closed windows: the ones left grow into their space.
@@ -1036,6 +1041,7 @@ final class Controller {
         }
         if onSurface {
             layoutSurface()
+            tendFloaters()
             finishLayout()
             return
         }
@@ -1109,6 +1115,10 @@ final class Controller {
             }
         }
         var strips: [TabStrip] = []
+        // Window moves go out to every app at once (endBatch, below); where
+        // each one really landed is read once they're all done.
+        var placedNow: [(window: UInt32, fallback: CGRect, record: (CGRect) -> Applied?)] = []
+        windows.beginBatch()
         for placed in placedAll where placed.panel.desktop == nil {
             // Inside a board drawn as a miniature: its windows tuck away.
             if miniatures.contains(placed.owner.id) { continue }
@@ -1247,8 +1257,8 @@ final class Controller {
                 }
                 guard var rel = placed.panel.floatRect(w) else {
                     windows.setFrame(w, fill)
-                    lastApplied[w] = Applied(frame: windows.frame(of: w) ?? fill, panelRect: target,
-                                             panel: placed.panel.id, filled: true)
+                    let pid = placed.panel.id
+                    placedNow.append((w, fill, { Applied(frame: $0, panelRect: target, panel: pid, filled: true) }))
                     continue
                 }
                 if let box = stretch {
@@ -1293,10 +1303,14 @@ final class Controller {
                 }
                 windows.setFrame(w, f)
                 // A stretched spot is only how it looks from here: don't save it as the window's own.
-                lastApplied[w] = stretch != nil ? nil
-                    : Applied(frame: windows.frame(of: w) ?? f, panelRect: target, panel: placed.panel.id, filled: false)
+                let pid = placed.panel.id
+                let stretched = stretch != nil
+                placedNow.append((w, f, { stretched ? nil : Applied(frame: $0, panelRect: target, panel: pid, filled: false) }))
             }
         }
+        windows.endBatch()
+        let landed = windows.frames(of: placedNow.map { $0.window })
+        for item in placedNow { lastApplied[item.window] = item.record(landed[item.window] ?? item.fallback) }
         // Portholes: windows that spilled out of a spot this size before are
         // tucked away below and a frosted picture shows in their place. The
         // rest are checked once they've settled at their new size. New
@@ -1341,6 +1355,7 @@ final class Controller {
         for w in surfaceFrames.keys where windows.exists(w) {
             windows.park(w, on: screen)
         }
+        tendFloaters()
         runProbes(probeSpots)
         // An app that won't shrink to its panel: widen the panel to fit it,
         // then lay out once more.
@@ -1545,7 +1560,7 @@ final class Controller {
         guard !onSurface, current.wallpaper != nil else { return }
         checkpoint()
         current.wallpaper = nil
-        state.save(to: stateURL)
+        saveState()
         backdrop.update(depth: depth, on: screen, custom: currentWallpaper)
     }
 
@@ -1591,11 +1606,11 @@ final class Controller {
             return
         }
         windows.refresh()
-        // Every board window in view now (some may be on their way out of view).
+        // Every board window in view now (some may be on their way out of
+        // view), read from every app at once.
+        let inView = Set(state.root.allWindows()).filter { windows.exists($0) && !windows.parked.contains($0) }
         var seen: [UInt32: CGRect] = [:]
-        for w in Set(state.root.allWindows()) where windows.exists(w) && !windows.parked.contains(w) {
-            if let f = windows.frame(of: w), screen.frame.intersects(f) { seen[w] = f }
-        }
+        for (w, f) in windows.frames(of: Array(inView)) where screen.frame.intersects(f) { seen[w] = f }
         let before = seen
         guard !before.isEmpty else {
             applyLayout()
@@ -1609,8 +1624,8 @@ final class Controller {
                 // Where each window is going: where it was sent, if it hasn't
                 // got there yet (apps take a moment to resize).
                 var after: [UInt32: CGRect] = [:]
-                for w in before.keys where self.windows.exists(w) && !self.windows.parked.contains(w) {
-                    guard let f = self.windows.frame(of: w), self.screen.frame.intersects(f) else { continue }
+                let still = before.keys.filter { self.windows.exists($0) && !self.windows.parked.contains($0) }
+                for (w, f) in self.windows.frames(of: still) where self.screen.frame.intersects(f) {
                     after[w] = self.windows.target(of: w) ?? f
                 }
                 return after
@@ -3034,7 +3049,7 @@ final class Controller {
         var marked = state.insideOnly ?? []
         if !marked.contains(w) { marked.append(w) }
         state.insideOnly = marked
-        state.save(to: stateURL)
+        saveState()
         applyLayout()   // on your desktop: it steps aside with your boards
         Toast.show("Sent \(windows.appName(w)) to \(mainName(d)) › \(placed.label)  ·  hidden from the view above",
                    seconds: 1.6)
@@ -3076,7 +3091,7 @@ final class Controller {
         animator.forgetEarlyPicture()   // the screen just changed
         noteSettledFrames()
         showBounds()
-        state.save(to: stateURL)
+        saveState()
         backdrop.update(depth: depth, on: screen, custom: currentWallpaper)
         shade.update(depth: depth, on: screen)
         refreshLobby()
@@ -3174,7 +3189,7 @@ final class Controller {
         if held?.window == w { held = nil; chip.hide() }
         remove(window: w)
         ignored.insert(w)
-        state.save(to: stateURL)
+        saveState()
         Toast.show("Released \(windows.appName(w))")
     }
 
@@ -3437,11 +3452,98 @@ final class Controller {
         return false
     }
 
+    // MARK: Outside windows
+
+    /// Hyper + P on an outside window: it joins the board where it is, as a
+    /// tab of the tile under it (on the Desktop, it floats there; in an empty
+    /// pool, it fills it). Locked or not, nothing else moves.
+    private func punchIn(_ w: UInt32) {
+        guard let f = windows.frame(of: w) else { return }
+        let center = CGPoint(x: f.midX, y: f.midY)
+        guard let under = frames(current, in: viewport)
+            .filter({ $0.depth == 0 && $0.panel.desktop == nil && $0.rect.contains(center) })
+            .first else {
+            Toast.show("Move it over a tile first, then Hyper + P", seconds: 1.2)
+            return
+        }
+        checkpoint()   // Hyper + Z puts it back outside
+        removeFloater(w)
+        let p = under.panel
+        if p.free == true {
+            if !p.windows.contains(w) { p.windows.append(w) }
+            p.setFloat(w, relative(f, in: under.rect.insetBy(dx: gap / 2, dy: gap / 2)))
+        } else if p.windows.isEmpty {
+            p.windows = [w]
+            p.free = nil
+        } else {
+            makeTab(w, in: p)
+        }
+        state.lastPanelId = p.id
+        lastApplied[w] = nil
+        glideLayout()
+        windows.focus(w)
+        Toast.show("\(windows.appName(w)) is in  ·  \(p.free == true ? "on the Desktop" : "a tab of this tile")", seconds: 1.2)
+    }
+
+    /// Every outside window, on any board.
+    private var allFloaters: Set<UInt32> { Set((state.floaters ?? [:]).values.flatMap { $0 }) }
+
+    func isFloater(_ w: UInt32) -> Bool { (state.floaters ?? [:]).values.contains { $0.contains(w) } }
+
+    /// Where each outside window was when it was tucked away, to come back to.
+    private var floatFrames: [UInt32: CGRect] = [:]
+
+    private func addFloater(_ w: UInt32, to board: UUID) {
+        var all = state.floaters ?? [:]
+        all[board.uuidString, default: []].append(w)
+        state.floaters = all
+    }
+
+    private func removeFloater(_ w: UInt32) {
+        guard var all = state.floaters else { return }
+        for (k, v) in all { all[k] = v.filter { $0 != w } }
+        all = all.filter { !$0.value.isEmpty }
+        state.floaters = all.isEmpty ? nil : all
+        floatFrames[w] = nil
+    }
+
+    /// Outside windows float on top of their own board, right where you put
+    /// them, and tuck away (remembering where they were) whenever you're
+    /// anywhere else, your normal desktop included.
+    private func tendFloaters() {
+        guard var all = state.floaters else { return }
+        let here = onSurface ? nil : current.id.uuidString
+        for (board, list) in all {
+            let alive = list.filter { windows.exists($0) }
+            all[board] = alive.isEmpty ? nil : alive
+            for w in alive {
+                if board == here {
+                    if windows.parked.contains(w) {
+                        windows.setFrame(w, floatFrames[w] ?? screen.visibleFrame.insetBy(dx: screen.visibleFrame.width * 0.2,
+                                                                                         dy: screen.visibleFrame.height * 0.2))
+                        windows.raise(w)
+                    }
+                } else if !windows.parked.contains(w) {
+                    if let f = windows.frame(of: w) { floatFrames[w] = f }
+                    windows.park(w, on: screen)
+                }
+            }
+        }
+        state.floaters = all.isEmpty ? nil : all
+    }
+
     /// Hyper + P: locks this board's placements (or unlocks them). Nothing
     /// docks, snaps, resizes, joins or opens room here: new windows float on
     /// top, and a window dragged around glides back to its tile.
     func togglePlacementLock() {
         guard !onSurface else { return }
+        // Pointing at an outside window: punch it into the board instead.
+        let m = NSEvent.mouseLocation
+        let top = NSScreen.screens.first?.frame.height ?? 0
+        if let hit = windows.windowAt(CGPoint(x: m.x, y: top - m.y)), isFloater(hit.id) {
+            punchIn(hit.id)
+            return
+        }
         var all = state.lockedBoards ?? []
         if let i = all.firstIndex(of: current.id) {
             all.remove(at: i)
@@ -3451,7 +3553,7 @@ final class Controller {
             Toast.show("Placements locked on this board  ·  Hyper + P unlocks", seconds: 1.4)
         }
         state.lockedBoards = all.isEmpty ? nil : all
-        state.save(to: stateURL)
+        saveState()
         showBounds()
     }
 
@@ -3472,7 +3574,7 @@ final class Controller {
             Toast.show("\(windows.appName(w)) locked in place  ·  Hyper + L unlocks", seconds: 1.4)
         }
         state.lockedWindows = all.isEmpty ? nil : all
-        state.save(to: stateURL)
+        saveState()
         showBounds()
     }
 
@@ -4165,7 +4267,7 @@ final class Controller {
         overflowSeen.removeAll()
         portholePictures.removeAll()
         selection = nil
-        state.save(to: stateURL)
+        saveState()
         if !onSurface { applyLayout() }
         Toast.show("Fresh start: one Main, all Desktop", seconds: 1.4)
     }
@@ -4173,7 +4275,7 @@ final class Controller {
     func resetLayout() {
         windows.unparkAll(on: screen)
         state = AppState()
-        state.save(to: stateURL)
+        saveState()
         Toast.show("Reset: one Main, all Desktop")
     }
 
@@ -5092,7 +5194,10 @@ final class Controller {
     /// window, which gives up the half on that side. In the middle of a
     /// window, or over open space in a pool, it floats where you let go.
     func dockTarget(at point: CGPoint, dragging w: UInt32, floating: Bool = false) -> DropTarget? {
-        guard !placementsLocked, !isLocked(w) else { return nil }
+        guard !isLocked(w) else { return nil }
+        // Locked: nothing lands anywhere by dragging. Outside windows stay
+        // outside until you punch one in (Hyper + P with the pointer on it).
+        guard !placementsLocked else { return nil }
         if tileWindows, !floating { return tileTarget(at: point, dragging: w) }
         guard let hit = dropPanels().filter({ $0.rect.contains(point) }).max(by: { $0.depth < $1.depth })
         else { return nil }
@@ -5173,10 +5278,12 @@ final class Controller {
     }
 
     func drop(_ window: UInt32, on target: DropTarget) {
-        if placementsLocked || isLocked(window) || (state.lockedBoards ?? []).contains(target.owner.id) {
+        if isLocked(window) || placementsLocked || (state.lockedBoards ?? []).contains(target.owner.id) {
             glideLayout()   // it glides back to its tile
             return
         }
+        // An outside window placed on a board is part of it from now on.
+        removeFloater(window)
         switch target.action {
         case .float, .desktop, .tab: break   // (tabs tell the coach themselves)
         default: Coach.shared.note(.docked)
@@ -6456,15 +6563,20 @@ final class Controller {
     /// Any new normal window that shows up while you're inside floats on the
     /// board you're on, in the panel it opened over.
     private func adoptNewWindows() {
-        // Placements locked: new windows float on top until you unlock.
-        guard !placementsLocked else { return }
         guard !onSurface, !busy, autoJoin, deploying == nil, AXIsProcessTrusted() else { return }
-        let known = Set(everyWindow())
+        let known = Set(everyWindow()).union(allFloaters)
         let fresh = windows.onScreenIDs().filter {
             !known.contains($0) && surfaceFrames[$0] == nil && !ignored.contains($0) && windows.isStandard($0)
                 && isOnMyScreen($0) && !belongsElsewhere($0)
         }
         guard !fresh.isEmpty else { return }
+        // Placements locked: new windows float on top of this board, outside
+        // its layout, and stay with it.
+        if placementsLocked {
+            for w in fresh { addFloater(w, to: current.id) }
+            saveState()
+            return
+        }
         checkpoint()
         let panels = dropPanels()
         let active = activePanel()
@@ -7101,7 +7213,7 @@ final class Controller {
         shade.update(depth: -1, on: screen)
         backdrop.update(depth: -1, on: screen)
         numbers.hide()
-        state.save(to: stateURL)
+        saveState()
     }
 
     /// Switching to an app that lives on another board (Cmd + Tab, the Dock)
@@ -7472,7 +7584,7 @@ final class Controller {
         saved.removeAll { $0.name == name }   // the same name replaces the old one
         saved.append(SavedPool(id: UUID(), name: name, saved: Date(), layout: .pool(r.leaf)))
         state.savedPools = saved
-        state.save(to: stateURL)
+        saveState()
         let refused = browserAccessRefused ?? browserNeedsAnswer
         browserAccessRefused = nil
         browserNeedsAnswer = nil
@@ -7756,7 +7868,7 @@ final class Controller {
     func deleteSavedPool(_ id: UUID) {
         state.savedPools?.removeAll { $0.id == id }
         if state.savedPools?.isEmpty == true { state.savedPools = nil }
-        state.save(to: stateURL)
+        saveState()
     }
 
     /// The apps in a saved setup, in order.
@@ -8075,6 +8187,35 @@ final class Controller {
         }
     }
 
+    // MARK: Saving
+
+    private var saveWork: DispatchWorkItem?
+    private static let saveQueue = DispatchQueue(label: "scuba.save", qos: .utility)
+
+    /// Saves the layout a moment from now: a burst of changes (a drag, a
+    /// glide) is written once, and the writing happens off the main thread.
+    func saveState() {
+        saveWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in self?.writeState() }
+        saveWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4, execute: work)
+    }
+
+    /// Writes anything still waiting, right now (when Scuba quits).
+    func flushSave() {
+        guard let work = saveWork else { return }
+        work.cancel()
+        writeState(wait: true)
+    }
+
+    private func writeState(wait: Bool = false) {
+        saveWork = nil
+        guard let data = state.encoded() else { return }
+        let url = stateURL
+        let write = { try? data.write(to: url, options: .atomic) }
+        if wait { Self.saveQueue.sync { _ = write() } } else { Self.saveQueue.async { _ = write() } }
+    }
+
     // MARK: Undo
 
     private var undoStack: [Data] = []
@@ -8117,7 +8258,7 @@ final class Controller {
     func setHome() {
         state.home = state.path.isEmpty ? nil : state.path
         state.homeMain = state.otherMains == nil ? nil : state.root.id
-        state.save(to: stateURL)
+        saveState()
         Toast.show("⌂ Home is now: \(locationLabel())")
     }
 

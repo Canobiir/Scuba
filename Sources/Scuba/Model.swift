@@ -939,6 +939,9 @@ final class AppState: Codable {
     var lockedBoards: [UUID]?
     /// Windows locked in place (Hyper + L): they stay in their tile, at its size.
     var lockedWindows: [UInt32]?
+    /// Outside windows: opened while a board's placements were locked, they
+    /// float on top of that board (board id → windows) and go where it goes.
+    var floaters: [String: [UInt32]]?
 
     init() {
         // A fresh start: the whole screen is the Desktop, where windows float
@@ -979,10 +982,12 @@ final class AppState: Codable {
     }
 
     func save(to url: URL = AppState.fileURL) {
+        if let data = encoded() { try? data.write(to: url, options: .atomic) }
+    }
+
+    func encoded() -> Data? {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted]
-        if let data = try? encoder.encode(self) {
-            try? data.write(to: url, options: .atomic)
-        }
+        return try? encoder.encode(self)
     }
 }

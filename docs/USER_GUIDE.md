@@ -281,7 +281,7 @@ Windows that fit stay real and usable.
 ![Maps live in its pool, and two Chrome windows showing as portholes](images/portholes.jpg)
 
 - **Click** a porthole to go to the board where the window is full size.
-- **Hyper + click** a porthole to enlarge the window right where you are
+- **Three-finger click** a porthole to enlarge the window right where you are
   (see [Spotlight](#11-spotlight-enlarge-one-window)).
 
 Choose how portholes look under **⊞ › Settings › Windows & pools ›
@@ -295,13 +295,10 @@ Windows too big for a nested pool**:
 
 ## 11. Spotlight: enlarge one window
 
-**Click with three fingers** on a window (or a porthole), **double-click its
-title bar**, or **Hyper + click** it, to enlarge it over the board,
-with a margin of the board still showing around it. **Hyper + click** it
-again (or three-finger click it again) to put
-it back. The app under the pointer also gets a three-finger click, so do it
-somewhere that isn't a button or link. Hyper + click another
-window to switch.
+**Click with three fingers** on a window (or a porthole), or **double-click its
+title bar**, to enlarge it over the board, with a margin of the board still
+showing around it. Do it again to put it back. The app under the pointer also
+gets a three-finger click, so do it somewhere that isn't a button or link.
 
 **Send to your desktop** in the menu sends the window in Spotlight (or, without Spotlight, the
 window you're using) to your normal desktop instead. It leaves your boards,
@@ -380,7 +377,7 @@ make it Home, and **Hyper + H** to go there from anywhere.
 
 On a 13" or 14" laptop screen, pools inside pools quickly get too small for
 most apps, so you'll see more [portholes](#10-portholes-windows-too-big-for-their-pool).
-They still let you see what's where, and a click or Hyper + click gets you
+They still let you see what's where, and a click or a three-finger click gets you
 to the real window.
 
 For more room for real windows, run the display at a higher resolution:
@@ -424,7 +421,7 @@ Press **Hyper + /** in Scuba to see this list on screen.
 | Hyper + X / C / V | Cut / copy / paste a window, with its tabs |
 | Hyper + Shift + 1–9 | Save the view on screen |
 | Hyper + 1–9 | Go back to that saved view |
-| Hyper + P | Lock this board's placements: nothing docks, snaps or resizes, new windows float on top (again unlocks) |
+| Hyper + P | Lock this board's placements: nothing docks, snaps or resizes (again unlocks). Windows opened meanwhile float on top and stay with this board; point at one and press Hyper + P again to punch it into the tile under it as a tab |
 | Hyper + L | Lock the window under the pointer in place (again unlocks) |
 | Hyper + F | Frost or unfrost the tile under the pointer (unfrosting, the tiles around it make room) |
 | Hyper + Z | Undo the last layout change |
@@ -433,7 +430,7 @@ Press **Hyper + /** in Scuba to see this list on screen.
 | Cmd + Option + ← / → | Back / forward through where you've been (the ‹ › arrows in the menu bar) |
 | Drag a gap's pill | Resize the tiles on either side |
 | Hyper + scroll, Hyper + pinch | Dive into / come back up from the pool under the pointer |
-| Hyper + click a window | Spotlight it; again to put it back |
+| Hold Hyper, click a pool's border and drag | Resize the pools on either side (reaches borders under windows too) |
 
 Everything else (the Overview, Home, naming, adding and deleting pools, tabs, saved pools, Spotlight, sending to your desktop) is in Scuba's menu bar menu. **Quick guide…** at the top of that menu walks through the basics.
 

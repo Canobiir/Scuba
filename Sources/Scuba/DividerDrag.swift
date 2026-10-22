@@ -65,8 +65,9 @@ final class DividerDrag {
             let c = pick()
             let d: Controller.Divider
             if hyper {
-                // Hyper: a generous reach, with the pool map shown.
-                guard let near = c.divider(near: p, tolerance: 24) else { return false }
+                // Hyper: grab the border nearest the click (a generous reach,
+                // over windows too), with the pool map shown.
+                guard let near = c.divider(near: p, tolerance: 40) else { return false }
                 d = near
             } else {
                 // No keys: only a press right in the gap itself, with no

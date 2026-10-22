@@ -8,7 +8,7 @@ work at full size and zoom back out to see everything at once.
 
 **[⬇ Download the latest version](../../releases/latest)** · Apple silicon Macs, macOS 14 or newer
 
-> **Beta (0.6).** Expect a few rough edges. Saved pools and live portholes
+> **Beta (0.7).** Ready for testing: expect a few rough edges. Saved pools and live portholes
 > are **BETA** within the beta. Feedback and bug reports are welcome on the
 > [Issues page](../../issues).
 
@@ -28,7 +28,8 @@ work at full size and zoom back out to see everything at once.
 - **Snapping.** Hyper + ← / → snaps the window you're using to a half, then
   Hyper + ↑ / ↓ makes it a quarter, the way Windows does it.
 - **Locks.** Hyper + P locks a board's placements; Hyper + L locks one
-  window in place.
+  window in place. Windows you open on a locked board float on top and
+  stay with it until you punch one in (Hyper + P on that window).
 - **Every window its own tile.** Drag a window onto another and it docks
   beside it, each with a space of its own. Pull it away and the space closes
   up. You see where everything will go before you let go.
