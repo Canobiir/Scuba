@@ -710,13 +710,13 @@ final class Controller {
         var all = savedViews
         all["\(n)"] = [state.root.id.uuidString] + state.path.map { $0.uuidString }
         savedViews = all
-        Toast.show("Saved \(breadcrumb())  ·  Hyper + \(n) comes back here", seconds: 1.5)
+        Toast.show("Saved \(breadcrumb())  ·  \(CapsKey.label) + \(n) comes back here", seconds: 1.5)
     }
 
     func goToView(_ n: Int) {
         guard !busy else { return }
         guard let ids = savedViews["\(n)"], let first = ids.first else {
-            Toast.show("Nothing saved on \(n)  ·  Hyper + Shift + \(n) saves this view", seconds: 1.4)
+            Toast.show("Nothing saved on \(n)  ·  \(CapsKey.label) + Shift + \(n) saves this view", seconds: 1.4)
             return
         }
         guard first == state.root.id.uuidString else {
@@ -2933,7 +2933,7 @@ final class Controller {
         checkpoint()
         moveToDesktop(w)
         glideLayout()
-        Toast.show("Sent \(windows.appName(w)) to your desktop  ·  Hyper + Esc to see it", seconds: 1.6)
+        Toast.show("Sent \(windows.appName(w)) to your desktop  ·  \(CapsKey.label) + Esc to see it", seconds: 1.6)
     }
 
     /// Takes a window off your boards and puts it on your normal desktop,
@@ -2982,7 +2982,7 @@ final class Controller {
         checkpoint()
         moveToDesktop(n)
         glideLayout()
-        Toast.show("\(name) went to your desktop  ·  Hyper + Esc to see it", seconds: 1.4)
+        Toast.show("\(name) went to your desktop  ·  \(CapsKey.label) + Esc to see it", seconds: 1.4)
         return true
     }
 
@@ -3116,7 +3116,7 @@ final class Controller {
                     : names.prefix(4).joined(separator: ", ") + (names.count > 4 ? " +\(names.count - 4)" : "")
             } else {
                 let names = p.windows.map { windows.appName($0) }
-                apps = names.isEmpty ? "empty · Hyper + scroll here to dive in" : names.joined(separator: ", ")
+                apps = names.isEmpty ? "empty · \(CapsKey.label) + scroll here to dive in" : names.joined(separator: ", ")
             }
             let label = (prefix + [displayName(p)]).joined(separator: " › ")
             return PanelMark(rect: placed.rect, label: label, apps: apps,
@@ -3236,8 +3236,8 @@ final class Controller {
         let name = windows.appName(w) + (heldTabs.isEmpty ? "" : " + \(heldTabs.count) tab\(heldTabs.count == 1 ? "" : "s")")
         chip.onClick = { [weak self] in self?.putBack() }
         chip.show(icon: windows.appIcon(w), title: kind == .cut ? "Cut: \(name)" : "Copied: \(name)",
-                  hint: kind == .cut ? "Hyper + V puts it down · click to put it back"
-                                     : "Hyper + V pastes a copy · click to cancel",
+                  hint: kind == .cut ? "\(CapsKey.label) + V puts it down · click to put it back"
+                                     : "\(CapsKey.label) + V pastes a copy · click to cancel",
                   on: screen)
         if kind == .cut || wasCut { glideLayout() }
     }
@@ -3259,7 +3259,7 @@ final class Controller {
     func paste() {
         guard !onSurface, !busy else { return }
         guard let h = held else {
-            Toast.show("Nothing to paste — Hyper + X cuts a window, Hyper + C copies one", seconds: 1.4)
+            Toast.show("Nothing to paste — \(CapsKey.label) + X cuts a window, \(CapsKey.label) + C copies one", seconds: 1.4)
             return
         }
         guard windows.exists(h.window) else {
@@ -3280,7 +3280,7 @@ final class Controller {
             return
         }
         if (state.lockedBoards ?? []).contains(target.owner.id) {
-            Toast.show("Placements are locked there  ·  Hyper + P unlocks", seconds: 1.2)
+            Toast.show("Placements are locked there  ·  \(CapsKey.label) + P unlocks", seconds: 1.2)
             return
         }
         checkpoint()
@@ -3442,11 +3442,11 @@ final class Controller {
     /// True (with a word about why) when a lock keeps this from happening.
     private func lockRefuses(_ w: UInt32? = nil) -> Bool {
         if placementsLocked {
-            Toast.show("Placements are locked here  ·  Hyper + P unlocks", seconds: 1.2)
+            Toast.show("Placements are locked here  ·  \(CapsKey.label) + P unlocks", seconds: 1.2)
             return true
         }
         if let w, isLocked(w) {
-            Toast.show("\(windows.appName(w)) is locked in place  ·  Hyper + L unlocks", seconds: 1.2)
+            Toast.show("\(windows.appName(w)) is locked in place  ·  \(CapsKey.label) + L unlocks", seconds: 1.2)
             return true
         }
         return false
@@ -3463,7 +3463,7 @@ final class Controller {
         guard let under = frames(current, in: viewport)
             .filter({ $0.depth == 0 && $0.panel.desktop == nil && $0.rect.contains(center) })
             .first else {
-            Toast.show("Move it over a tile first, then Hyper + P", seconds: 1.2)
+            Toast.show("Move it over a tile first, then \(CapsKey.label) + P", seconds: 1.2)
             return
         }
         checkpoint()   // Hyper + Z puts it back outside
@@ -3550,7 +3550,7 @@ final class Controller {
             Toast.show("Placements unlocked", seconds: 0.9)
         } else {
             all.append(current.id)
-            Toast.show("Placements locked on this board  ·  Hyper + P unlocks", seconds: 1.4)
+            Toast.show("Placements locked on this board  ·  \(CapsKey.label) + P unlocks", seconds: 1.4)
         }
         state.lockedBoards = all.isEmpty ? nil : all
         saveState()
@@ -3562,7 +3562,7 @@ final class Controller {
     func toggleWindowLock() {
         guard !onSurface, !busy else { return }
         guard let w = windowUnderPointer() ?? windows.focusedWindowID().flatMap({ liveIn[$0] != nil ? $0 : nil }) else {
-            Toast.show("Point at a window on a board, then Hyper + L", seconds: 1.2)
+            Toast.show("Point at a window on a board, then \(CapsKey.label) + L", seconds: 1.2)
             return
         }
         var all = state.lockedWindows ?? []
@@ -3571,7 +3571,7 @@ final class Controller {
             Toast.show("\(windows.appName(w)) unlocked", seconds: 0.9)
         } else {
             all.append(w)
-            Toast.show("\(windows.appName(w)) locked in place  ·  Hyper + L unlocks", seconds: 1.4)
+            Toast.show("\(windows.appName(w)) locked in place  ·  \(CapsKey.label) + L unlocks", seconds: 1.4)
         }
         state.lockedWindows = all.isEmpty ? nil : all
         saveState()
@@ -3617,7 +3617,7 @@ final class Controller {
         }
         guard !busy else { return }
         guard let w = windows.focusedWindowID() else {
-            if vertical { upOrDown() } else { Toast.show("Click a window first — Hyper + ← / → snaps it", seconds: 1.2) }
+            if vertical { upOrDown() } else { Toast.show("Click a window first — \(CapsKey.label) + ← / → snaps it", seconds: 1.2) }
             return
         }
         let spot = validSnap(w)
@@ -3632,8 +3632,8 @@ final class Controller {
                 if top == up {
                     // As far as it goes that way: the next press dives / comes up.
                     snapped[w] = nil
-                    Toast.show(up ? "Top quarter  ·  Hyper + ↑ again dives in"
-                                  : "Bottom quarter  ·  Hyper + ↓ again comes back up", seconds: 1.1)
+                    Toast.show(up ? "Top quarter  ·  \(CapsKey.label) + ↑ again dives in"
+                                  : "Bottom quarter  ·  \(CapsKey.label) + ↓ again comes back up", seconds: 1.1)
                 } else {
                     backToHalf(w, right: right)
                 }
@@ -3822,7 +3822,7 @@ final class Controller {
         let d = current
         let placed = frames(d, in: viewport).filter { $0.depth == 0 }
         guard let hit = placed.first(where: { $0.rect.contains(point) }) else {
-            Toast.show("Point at a breathing room, then Hyper + Y", seconds: 1.2)
+            Toast.show("Point at a breathing room, then \(CapsKey.label) + Y", seconds: 1.2)
             return
         }
         let p = hit.panel
@@ -3842,7 +3842,7 @@ final class Controller {
             Toast.show("Breathing room again  ·  its own place to dive into", seconds: 1.2)
             return
         }
-        Toast.show("Point at a breathing room  ·  Hyper + Y tiles it in beside its neighbour", seconds: 1.4)
+        Toast.show("Point at a breathing room  ·  \(CapsKey.label) + Y tiles it in beside its neighbour", seconds: 1.4)
     }
 
     private func tileRoom(_ room: Panel, at rect: CGRect, among placed: [Placed]) {
@@ -3864,7 +3864,7 @@ final class Controller {
         room.roomFit = nil
         room.free = nil
         tiledRooms[room.id] = mark
-        Toast.show("Tiled into the board  ·  Hyper + Y again makes it breathing room", seconds: 1.4)
+        Toast.show("Tiled into the board  ·  \(CapsKey.label) + Y again makes it breathing room", seconds: 1.4)
         if let w = room.windows.first { growTile(room, w) } else { glideLayout() }
     }
 
@@ -4014,7 +4014,7 @@ final class Controller {
     private func topHint() {
         guard Date().timeIntervalSince(lastTopHint) > 1.5 else { return }
         lastTopHint = Date()
-        Toast.show("That's everything · Hyper + Esc for your desktop", seconds: 1.1)
+        Toast.show("That's everything · \(CapsKey.label) + Esc for your desktop", seconds: 1.1)
     }
 
     /// The key for the Overview's remembered picture.
@@ -4145,7 +4145,7 @@ final class Controller {
     private func stopHint() {
         guard Date().timeIntervalSince(lastStopHint) > 1.5 else { return }
         lastStopHint = Date()
-        Toast.show("\(mainName(state.root)) is the top · Hyper + Esc for your desktop", seconds: 1.1)
+        Toast.show("\(mainName(state.root)) is the top · \(CapsKey.label) + Esc for your desktop", seconds: 1.1)
     }
 
     /// Hyper + scroll: dive into whatever is under the pointer. From your
@@ -5003,7 +5003,7 @@ final class Controller {
         state.lastPanelId = hit.panel.id
         glideLayout()
         windows.focus(w)
-        Toast.show("\(windows.appName(w)) tabbed  ·  Hyper + Shift + [ ] to switch", seconds: 1.2)
+        Toast.show("\(windows.appName(w)) tabbed  ·  \(CapsKey.label) + Shift + [ ] to switch", seconds: 1.2)
     }
 
     /// A tab dragged out of its strip (or Hyper + Shift + T): a tile of its
@@ -5449,7 +5449,7 @@ final class Controller {
         checkpoint()   // Hyper + Z puts it back
         handFrost.insert(p.id)
         applyLayout()
-        Toast.show("Frosted \(displayName(p)) — Hyper + F or swipe up to bring it back", seconds: 1.4)
+        Toast.show("Frosted \(displayName(p)) — \(CapsKey.label) + F or swipe up to bring it back", seconds: 1.4)
     }
 
     private func unfrost(_ hit: Placed) {
@@ -6058,7 +6058,7 @@ final class Controller {
             board.replace(node.id, with: .panel(room))
             self.state.path = newPath
         }) {
-            Toast.show("New room · \(count) window\(count == 1 ? "" : "s")  ·  Hyper + ↓ to come back up", seconds: 1.6)
+            Toast.show("New room · \(count) window\(count == 1 ? "" : "s")  ·  \(CapsKey.label) + ↓ to come back up", seconds: 1.6)
         }
     }
 
@@ -7570,7 +7570,7 @@ final class Controller {
         let suggested = appSummary(r.windows.map { windows.appName($0) }, joiner: " + ")
         let shape = p.desktop.map { "\($0.panels().count) pools, " } ?? ""
         var info = "Saves its layout (\(shape)\(r.windows.count) window\(r.windows.count == 1 ? "" : "s"))"
-            + (close ? " and closes it." : ".") + " Open it again into any empty pool with Hyper + Shift + O."
+            + (close ? " and closes it." : ".") + " Open it again into any empty pool with \(CapsKey.label) + Shift + O."
         if let app = browserAccessRefused {
             info += "\n\n\(app)'s tabs won't be saved: allow Scuba to control \(app) in System Settings › "
                 + "Privacy & Security › Automation."
@@ -7824,16 +7824,16 @@ final class Controller {
     func chooseSavedPool(fromMenu: Bool = false) {
         guard !onSurface, !busy else { return }
         guard let saved = state.savedPools, !saved.isEmpty else {
-            Toast.show("No saved pools yet — Hyper + Shift + S saves the pool under the pointer", seconds: 1.6)
+            Toast.show("No saved pools yet — \(CapsKey.label) + Shift + S saves the pool under the pointer", seconds: 1.6)
             return
         }
         guard let target = poolToFill(fromMenu: fromMenu) else { return }
         guard target.panel.free != true else {
-            Toast.show("Saved pools open into a pool, not the Desktop — Hyper + B opens one", seconds: 1.4)
+            Toast.show("Saved pools open into a pool, not the Desktop — \(CapsKey.label) + B opens one", seconds: 1.4)
             return
         }
         guard shownWindows(target.panel, of: target.owner).isEmpty else {
-            Toast.show("Point at an empty pool first — Hyper + B opens one", seconds: 1.4)
+            Toast.show("Point at an empty pool first — \(CapsKey.label) + B opens one", seconds: 1.4)
             return
         }
         let menu = NSMenu()
@@ -7854,11 +7854,11 @@ final class Controller {
     func chooseSavedPoolFromMenu(_ sp: SavedPool) {
         guard !onSurface, !busy, let target = poolToFill(fromMenu: true) else { return }
         guard target.panel.free != true else {
-            Toast.show("Saved pools open into a pool, not the Desktop — Hyper + B opens one", seconds: 1.4)
+            Toast.show("Saved pools open into a pool, not the Desktop — \(CapsKey.label) + B opens one", seconds: 1.4)
             return
         }
         guard shownWindows(target.panel, of: target.owner).isEmpty else {
-            Toast.show("Go into an empty pool first — Hyper + B opens one", seconds: 1.4)
+            Toast.show("Go into an empty pool first — \(CapsKey.label) + B opens one", seconds: 1.4)
             return
         }
         deploy(sp, into: target.panel.id)

@@ -387,23 +387,23 @@ private struct GettingStartedView: View {
 
     private let steps: [Step] = [
         Step(symbol: "arrow.down.right.and.arrow.up.left", title: "Dive in and out",
-             detail: "Hyper + ↑, or pinch out on bare desktop, takes you into Scuba. Three fingers up (or Hyper + ↓) comes back up a level; Hyper + Esc goes straight to your desktop."),
+             detail: "\(CapsKey.label) + ↑, or pinch out on bare desktop, takes you into Scuba. Three fingers up (or \(CapsKey.label) + ↓) comes back up a level; \(CapsKey.label) + Esc goes straight to your desktop."),
         Step(symbol: "rectangle.split.2x2", title: "Snap",
-             detail: "Hyper + ← / → snaps the window you're using to that half. Then Hyper + ↑ / ↓ makes it the top or bottom quarter. Or drag a window by its title bar to an edge."),
+             detail: "\(CapsKey.label) + ← / → snaps the window you're using to that half. Then \(CapsKey.label) + ↑ / ↓ makes it the top or bottom quarter. Or drag a window by its title bar to an edge."),
         Step(symbol: "arrow.left.and.right", title: "Resize",
-             detail: "Drag the pill in the gap between two windows, or hold Hyper and grab any border (even under a window). A window too small to use frosts over and comes back when there's room; Hyper + F frosts or unfrosts one by hand."),
+             detail: "Drag the pill in the gap between two windows, or hold \(CapsKey.label) and grab any border (even under a window). A window too small to use frosts over and comes back when there's room; \(CapsKey.label) + F frosts or unfrosts one by hand."),
         Step(symbol: "rectangle.stack", title: "Tab",
              detail: "Drop a window on the middle of another and pause a moment. They share a strip of tabs."),
         Step(symbol: "square.dashed", title: "Breathing room",
-             detail: "Hyper + B opens a little space of its own to dive into. Hyper + Y tiles it into the board beside its neighbour instead (again: back to its own space)."),
+             detail: "\(CapsKey.label) + B opens a little space of its own to dive into. \(CapsKey.label) + Y tiles it into the board beside its neighbour instead (again: back to its own space)."),
         Step(symbol: "eye.slash", title: "Keep things tucked inside",
-             detail: "Three fingers down on a tile steps into it. Hyper + H hides the window under the pointer from the layer above (Shift: its whole pool), so it's only there when you zoom in. Cmd + Shift + drag a box around windows to make them a room."),
+             detail: "Three fingers down on a tile steps into it. \(CapsKey.label) + H hides the window under the pointer from the layer above (Shift: its whole pool), so it's only there when you zoom in. Cmd + Shift + drag a box around windows to make them a room."),
         Step(symbol: "doc.on.doc", title: "Move windows anywhere",
-             detail: "Hyper + X cuts the window you're using (C copies it), tabs and all. Go anywhere and Hyper + V puts it down under the pointer."),
+             detail: "\(CapsKey.label) + X cuts the window you're using (C copies it), tabs and all. Go anywhere and \(CapsKey.label) + V puts it down under the pointer."),
         Step(symbol: "bookmark", title: "Save a view",
-             detail: "Hyper + Shift + a number saves what's on screen. Hyper + that number comes straight back. ‹ › in the menu bar go back and forward through where you've been."),
+             detail: "\(CapsKey.label) + Shift + a number saves what's on screen. \(CapsKey.label) + that number comes straight back. ‹ › in the menu bar go back and forward through where you've been."),
         Step(symbol: "lock", title: "Lock",
-             detail: "Hyper + P locks this board's placements: nothing docks, snaps or resizes. Windows you open while it's locked float on top and stay with this board; point at one and press Hyper + P to punch it into the tile under it as a tab. Hyper + L locks the window under the pointer in place."),
+             detail: "\(CapsKey.label) + P locks this board's placements: nothing docks, snaps or resizes. Windows you open while it's locked float on top and stay with this board; point at one and press \(CapsKey.label) + P to punch it into the tile under it as a tab. \(CapsKey.label) + L locks the window under the pointer in place."),
     ]
 
     var body: some View {
@@ -412,7 +412,7 @@ private struct GettingStartedView: View {
                 Text("⊞").font(.system(size: 30))
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Quick guide").font(.title2.bold())
-                    Text("Hyper is Control + Option + Command").foregroundStyle(.secondary)
+                    Text(CapsKey.usingCaps ? "Hold Caps Lock for these — a tap is still Caps Lock" : "Hyper is Control + Option + Command").foregroundStyle(.secondary)
                 }
             }
             VStack(alignment: .leading, spacing: 12) {

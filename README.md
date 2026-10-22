@@ -8,12 +8,14 @@ work at full size and zoom back out to see everything at once.
 
 **[⬇ Download the latest version](../../releases/latest)** · Apple silicon Macs, macOS 14 or newer
 
-> **Beta (0.7).** Ready for testing: expect a few rough edges. Saved pools and live portholes
+> **Beta (0.8).** Ready for testing: expect a few rough edges. Saved pools and live portholes
 > are **BETA** within the beta. Feedback and bug reports are welcome on the
 > [Issues page](../../issues).
 
 ## What it does
 
+- **Caps Lock is your Scuba key.** Hold it for Scuba's shortcuts; a quick
+  tap is still normal Caps Lock, and the light only comes on for a tap.
 - **The Desktop.** A fresh start is all Desktop, where windows float like on
   a normal Mac: nothing moves until you dock one. Drag a window to a screen
   edge and it docks there, and the Desktop makes room.
@@ -25,17 +27,17 @@ work at full size and zoom back out to see everything at once.
   the windows glide there; windows have fine outlines, and frost over only
   when they're too small to use. Cmd + Shift + drag a box to zoom in on that
   part; double-click a title bar or the Desktop to zoom in on it.
-- **Snapping.** Hyper + ← / → snaps the window you're using to a half, then
-  Hyper + ↑ / ↓ makes it a quarter, the way Windows does it.
-- **Locks.** Hyper + P locks a board's placements; Hyper + L locks one
+- **Snapping.** Caps Lock + ← / → snaps the window you're using to a half, then
+  Caps Lock + ↑ / ↓ makes it a quarter, the way Windows does it.
+- **Locks.** Caps Lock + P locks a board's placements; Caps Lock + L locks one
   window in place. Windows you open on a locked board float on top and
-  stay with it until you punch one in (Hyper + P on that window).
+  stay with it until you punch one in (Caps Lock + P on that window).
 - **Every window its own tile.** Drag a window onto another and it docks
   beside it, each with a space of its own. Pull it away and the space closes
   up. You see where everything will go before you let go.
 - **Pools.** Each board is split into pools, and each pool holds one or
   more windows, filling it or floating inside it. Drag a window onto a pool,
-  or cut and paste it there (Hyper + X, Hyper + V), tabs and all.
+  or cut and paste it there (Caps Lock + X, Caps Lock + V), tabs and all.
 - **Pools inside pools.** Any pool can hold a board of its own. Zoom in to
   work at full size, zoom out to see everything in miniature. The menu bar
   shows where you are, like `Main › 3 › 3`.
@@ -43,7 +45,7 @@ work at full size and zoom back out to see everything at once.
   the pool under the pointer, up to zoom out, sideways to move to the next
   board.
 - **Your desktop stays as it is.** Scuba only arranges windows once you go
-  in (Hyper + ↑). Hyper + Esc puts your normal desktop back.
+  in (Caps Lock + ↑). Caps Lock + Esc puts your normal desktop back.
 - **Portholes.** On a nested board, a window too big for its pool shows as
   a picture of itself instead of spilling over its neighbours.
 - **A coach for your first swim.** A small card walks you through the
@@ -96,4 +98,5 @@ open build/Scuba.app
 
 ## License
 
-[MIT](LICENSE)
+All rights reserved: free to download and use, but the code isn't open
+source. Versions 0.7 and earlier were released under MIT. See [LICENSE](LICENSE).

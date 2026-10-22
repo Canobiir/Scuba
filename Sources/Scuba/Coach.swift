@@ -178,19 +178,19 @@ final class Coach {
     private static func text(_ s: Step) -> (String, String) {
         switch s {
         case .dive:
-            return ("Dive in", "Press Hyper + ↑ (Control + Option + Command + ↑), or pinch out on empty desktop. Your windows line up on Main.")
+            return ("Dive in", "Press \(CapsKey.label) + ↑\(CapsKey.usingCaps ? "" : " (Control + Option + Command + ↑)"), or pinch out on empty desktop. Your windows line up on Main.")
         case .nest:
-            return ("Nest a window", "Drag a window by its title bar to the edge of another window, or of the screen. The windows around it make room. (Hyper + ← / → snaps one too.)")
+            return ("Nest a window", "Drag a window by its title bar to the edge of another window, or of the screen. The windows around it make room. (\(CapsKey.label) + ← / → snaps one too.)")
         case .tab:
             return ("Tab two windows", "Drop a window on the middle of another and pause a moment. They share a strip of tabs.")
         case .room:
-            return ("Make breathing room", "Press Hyper + B. An empty corner opens near the pointer: a little space of its own, ready to dive into.")
+            return ("Make breathing room", "Press \(CapsKey.label) + B. An empty corner opens near the pointer: a little space of its own, ready to dive into.")
         case .deeper:
-            return ("Go deeper", "Swipe down with three fingers on that breathing room to dive into it, then press Hyper + B again: a room inside a room.")
+            return ("Go deeper", "Swipe down with three fingers on that breathing room to dive into it, then press \(CapsKey.label) + B again: a room inside a room.")
         case .bubble:
             return ("There's more in here", "That small dark bubble means a tile holds windows you can't see from here. Click it, or dive in, to find them.")
         case .frost:
-            return ("Why that window frosted", "Some apps won't shrink as far as you'd like, so when a spot is too tight Scuba frosts the window instead of letting it spill over. You have the last word: Hyper + F unfrosts it and the tiles around it make room. Hyper + F on any window frosts it by hand when it's fighting you.")
+            return ("Why that window frosted", "Some apps won't shrink as far as you'd like, so when a spot is too tight Scuba frosts the window instead of letting it spill over. You have the last word: \(CapsKey.label) + F unfrosts it and the tiles around it make room. \(CapsKey.label) + F on any window frosts it by hand when it's fighting you.")
         case .menu:
             return ("Everything else lives up here", "The ⊞ in the menu bar has the rest, and the Quick guide whenever you want a refresher. That's the basics. Enjoy the swim.")
         }

@@ -296,7 +296,7 @@ private final class LobbyView: NSView {
 
         // Hint.
         if let h = L.hint {
-            text("Hyper + swipe sideways or Hyper + [ ] to step through.\nDrop a window here to keep this space.",
+            text("\(CapsKey.label) + swipe sideways or \(CapsKey.label) + [ ] to step through.\nDrop a window here to keep this space.",
                  font(11), quiet, in: h, shadow: true)
         }
     }

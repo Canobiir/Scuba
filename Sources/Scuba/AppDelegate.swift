@@ -25,6 +25,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     /// The pill inside it: ‹ › · desktop, everything · the Scuba menu.
     private var pill: MenuBarPill?
     private let statusMenu = NSMenu()
+    /// Quitting from Terminal (pkill) still gives Caps Lock back.
+    private var signalSources: [DispatchSourceSignal] = []
 
     // MARK: Displays
 
@@ -320,8 +322,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         launched = true
         for url in pendingLinks { run(url) }
         pendingLinks.removeAll()
+        // Caps Lock as your Scuba key (pilot): hold it for Hyper, tap it for caps.
+        UserDefaults.standard.register(defaults: [CapsKey.defaultsKey: true])
+        for sig in [SIGTERM, SIGINT] {
+            signal(sig, SIG_IGN)
+            let s = DispatchSource.makeSignalSource(signal: sig, queue: .global(qos: .userInitiated))
+            s.setEventHandler(handler: AppDelegate.exitGivingCapsLockBack)
+            s.resume()
+            signalSources.append(s)
+        }
         if AXIsProcessTrusted() {
-            Toast.show(controller.onSurface ? "Scuba is running — Hyper + ↑ to dive in" : "Scuba is running", seconds: 2)
+            if UserDefaults.standard.bool(forKey: CapsKey.defaultsKey) { CapsKey.shared.setEnabled(true) }
+            Toast.show(controller.onSurface ? "Scuba is running — \(CapsKey.label) + ↑ to dive in" : "Scuba is running", seconds: 2)
             // Restarted partway through Setup: pick up where you left off.
             if SetupModel.reopenAfterRestart { setup.show() }
         } else {
@@ -329,7 +341,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         }
     }
 
+    /// Off the main thread on purpose, so it works even if Scuba is stuck.
+    nonisolated static func exitGivingCapsLockBack() {
+        CapsKey.shared.restoreForExit()
+        exit(0)
+    }
+
     func applicationWillTerminate(_ notification: Notification) {
+        CapsKey.shared.setEnabled(false)
         for c in controllers.values {
             c.flushSave()
             c.restoreAll()
@@ -406,7 +425,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
                               enabled: forward, width: 20))
         }
         segs.append(.init(id: "desktop", symbol: "menubar.dock.rectangle",
-                          tip: inside ? "Your desktop  (Hyper + Esc)" : "Back into your boards  (Hyper + ↑)",
+                          tip: inside ? "Your desktop  (\(CapsKey.label) + Esc)" : "Back into your boards  (\(CapsKey.label) + ↑)",
                           on: !inside))
         segs.append(.init(id: "everything", symbol: "square.grid.2x2", tip: "Everything"))
         let here = inside ? c.breadcrumb() : "Your desktop"
@@ -435,7 +454,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             HotKeys.register(key, mods) {
                 guard let self, self.requireAccessibility() else { return }
                 if self.controller.onSurface && !onSurfaceToo {
-                    Toast.show("You're on your desktop — Hyper + ↑ to dive in", seconds: 1.2)
+                    Toast.show("You're on your desktop — \(CapsKey.label) + ↑ to dive in", seconds: 1.2)
                     return
                 }
                 // Using a shortcut means this Hyper hold isn't for a look at the panels.
@@ -505,31 +524,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         HotKeys.register(kVK_ANSI_Slash, H) { Toast.show(AppDelegate.helpText, seconds: 7) }
     }
 
-    static let helpText = """
-    Scuba   (Hyper = Ctrl + Option + Cmd)
+    static var helpText: String { """
+    Scuba   \(CapsKey.usingCaps ? "(hold Caps Lock for these — a tap is still Caps Lock)" : "(Hyper = Ctrl + Option + Cmd)")
 
-    Hyper + ← / →           snap the window you're using to that half
-    Hyper + ↑ / ↓           snapped: top / bottom quarter (the other way: the half again)
+    \(CapsKey.label) + ← / →           snap the window you're using to that half
+    \(CapsKey.label) + ↑ / ↓           snapped: top / bottom quarter (the other way: the half again)
                             not snapped: dive in / come back up
-    Hyper + Esc             back to your desktop
-    Hyper + B               open / fold away breathing room
-    Hyper + Y               tile the breathing room under the pointer into the board (again: room again)
-    Hyper + H               hide the window under the pointer from the layer above (Shift: its whole pool)
-    Hyper + X / C / V       cut / copy / paste a window, tabs and all
-    Hyper + Shift + 1–9     save the view on screen   ·   Hyper + 1–9: back to it
-    Hyper + P               lock this board's placements (nothing docks, snaps or resizes;
+    \(CapsKey.label) + Esc             back to your desktop
+    \(CapsKey.label) + B               open / fold away breathing room
+    \(CapsKey.label) + Y               tile the breathing room under the pointer into the board (again: room again)
+    \(CapsKey.label) + H               hide the window under the pointer from the layer above (Shift: its whole pool)
+    \(CapsKey.label) + X / C / V       cut / copy / paste a window, tabs and all
+    \(CapsKey.label) + Shift + 1–9     save the view on screen   ·   \(CapsKey.label) + 1–9: back to it
+    \(CapsKey.label) + P               lock this board's placements (nothing docks, snaps or resizes;
                             windows opened meanwhile float on top and stay with the board;
-                            Hyper + P on one of those punches it into the tile under it)
-    Hyper + L               lock the window under the pointer in place
-    Hyper + F               frost / unfrost the tile under the pointer
-    Hyper + Z               undo
+                            \(CapsKey.label) + P on one of those punches it into the tile under it)
+    \(CapsKey.label) + L               lock the window under the pointer in place
+    \(CapsKey.label) + F               frost / unfrost the tile under the pointer
+    \(CapsKey.label) + Z               undo
 
     Three fingers: down / up dive in / come back up · sideways: next board · click: Spotlight
     Pinch out / in on empty space: dive in / come back up
-    Drag a gap's pill to resize, or hold Hyper and grab any border · drop a window on another's middle to tab it
+    Drag a gap's pill to resize, or hold \(CapsKey.label) and grab any border · drop a window on another's middle to tab it
     Cmd + Shift + drag a box: make those windows a room of their own
     Everything else is in the menu bar.
-    """
+    """ }
 
     // MARK: Menu
 
@@ -538,7 +557,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let item = NSMenuItem(title: "Breathing room", action: nil, keyEquivalent: "")
         let sub = NSMenu()
         sub.autoenablesItems = false
-        sub.addItem(ActionItem("Open breathing room here  (Hyper + B)", enabled: !c.onSurface) {
+        sub.addItem(ActionItem("Open breathing room here  (\(CapsKey.label) + B)", enabled: !c.onSurface) {
             c.toggleBreathingRoom()
         })
         sub.addItem(ActionItem("Open it every time you dive in", checked: c.breathingRoom) {
@@ -590,16 +609,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         let item = NSMenuItem(title: "Hiding windows & pools", action: nil, keyEquivalent: "")
         let sub = NSMenu()
         sub.autoenablesItems = false
-        sub.addItem(ActionItem("Hide / show the window under the pointer  (Hyper + H)", enabled: !c.onSurface) {
+        sub.addItem(ActionItem("Hide / show the window under the pointer  (\(CapsKey.label) + H)", enabled: !c.onSurface) {
             c.hideWindowHere()
         })
-        sub.addItem(ActionItem("Hide / show the pool under the pointer  (Hyper + Shift + H)", enabled: !c.onSurface) {
+        sub.addItem(ActionItem("Hide / show the pool under the pointer  (\(CapsKey.label) + Shift + H)", enabled: !c.onSurface) {
             c.hidePoolHere()
         })
-        sub.addItem(ActionItem("Lock placements on this board  (Hyper + P)", checked: c.placementsLocked) {
+        sub.addItem(ActionItem("Lock placements on this board  (\(CapsKey.label) + P)", checked: c.placementsLocked) {
             c.togglePlacementLock()
         })
-        sub.addItem(ActionItem("Lock / unlock the window under the pointer  (Hyper + L)", enabled: !c.onSurface) {
+        sub.addItem(ActionItem("Lock / unlock the window under the pointer  (\(CapsKey.label) + L)", enabled: !c.onSurface) {
             c.toggleWindowLock()
         })
         let title = NSMenuItem(title: "Seen from above, hidden things…", action: nil, keyEquivalent: "")
@@ -675,7 +694,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         sub.addItem(ActionItem("Throw a window to send it across", checked: c.throwing) {
             c.throwing.toggle()
         })
-        sub.addItem(ActionItem("Zooming out stops at Main (Hyper + Esc still goes to your desktop)",
+        sub.addItem(ActionItem("Zooming out stops at Main (\(CapsKey.label) + Esc still goes to your desktop)",
                                checked: c.stopAtMain) {
             c.stopAtMain.toggle()
         })
@@ -791,7 +810,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
         // On the Surface (your normal desktop) the menu stays minimal.
         if c.onSurface {
-            menu.addItem(ActionItem("Dive in  (Hyper + ↑)", enabled: trusted) { c.zoomInStep() })
+            menu.addItem(ActionItem("Dive in  (\(CapsKey.label) + ↑)", enabled: trusted) { c.zoomInStep() })
             menu.addItem(ActionItem("Go Home", enabled: trusted) { c.goHome() })
             menu.addItem(ActionItem("Overview of all boards", enabled: trusted) { self.overview.open() })
             menu.addItem(ActionItem("Send the front window to a pool…", enabled: trusted) {
@@ -808,9 +827,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             return
         }
 
-        menu.addItem(ActionItem("Back to desktop  (Hyper + Esc)", enabled: trusted) { c.surface() })
+        menu.addItem(ActionItem("Back to desktop  (\(CapsKey.label) + Esc)", enabled: trusted) { c.surface() })
         menu.addItem(ActionItem("Overview of all boards", enabled: trusted) { self.overview.open() })
-        menu.addItem(ActionItem("Undo  (Hyper + Z)", enabled: trusted) { c.undo() })
+        menu.addItem(ActionItem("Undo  (\(CapsKey.label) + Z)", enabled: trusted) { c.undo() })
         menu.addItem(ActionItem("Float every window on the Desktop", enabled: trusted) { c.floatAllOnDesktop() })
         if !c.isHome { menu.addItem(ActionItem("Go Home", enabled: trusted) { c.goHome() }) }
         menu.addItem(ActionItem("Back  (Cmd + Option + ←)", enabled: trusted && c.canGoBack) { c.goBack() })
@@ -819,13 +838,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         menu.addItem(.separator())
         if let h = c.held {
             let name = c.windows.appName(h.window)
-            menu.addItem(ActionItem("Paste \(name) here  (Hyper + V)", enabled: trusted) { c.paste() })
+            menu.addItem(ActionItem("Paste \(name) here  (\(CapsKey.label) + V)", enabled: trusted) { c.paste() })
             menu.addItem(ActionItem(h.kind == .cut ? "Put \(name) back" : "Stop holding \(name)", enabled: trusted) {
                 c.putBack()
             })
         } else {
-            menu.addItem(ActionItem("Cut focused window  (Hyper + X)", enabled: trusted) { c.cutFocused() })
-            menu.addItem(ActionItem("Copy focused window  (Hyper + C)", enabled: trusted) { c.copyFocused() })
+            menu.addItem(ActionItem("Cut focused window  (\(CapsKey.label) + X)", enabled: trusted) { c.cutFocused() })
+            menu.addItem(ActionItem("Copy focused window  (\(CapsKey.label) + C)", enabled: trusted) { c.copyFocused() })
         }
         menu.addItem(.separator())
         menu.addItem(boardMenu(c, trusted: trusted))
@@ -941,6 +960,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         sub.addItem(windowsMenu(c))
         sub.addItem(lookMenu(c))
         if NSScreen.screens.count > 1 { sub.addItem(displaysMenu()) }
+        sub.addItem(.separator())
+        sub.addItem(ActionItem("Hold Caps Lock for Hyper (pilot) — a tap is still Caps Lock",
+                               checked: CapsKey.shared.enabled) {
+            let on = !CapsKey.shared.enabled
+            UserDefaults.standard.set(on, forKey: CapsKey.defaultsKey)
+            CapsKey.shared.setEnabled(on)
+            if on && !CapsKey.shared.enabled {
+                Toast.show("Caps Lock needs Scuba's Accessibility access", seconds: 2)
+            }
+        })
         sub.addItem(.separator())
         sub.addItem(ActionItem("Reset: one Main, all Desktop") { c.resetLayout() })
         sub.addItem(ActionItem("Close all board windows & start over (for testing)…", enabled: trusted) {

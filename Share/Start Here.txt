@@ -1,4 +1,4 @@
-WELCOME TO SCUBA  (0.7 beta)
+WELCOME TO SCUBA  (0.8 beta)
 ============================
 
 Scuba lives in your menu bar (the ⊞ icon) and arranges your windows into
@@ -60,7 +60,7 @@ Those windows show as portholes instead: a frosted picture of the
 window, cropped at its pool's edge. Click one to dive to its board, or
 click it with three fingers to blow the window up right where you are.
 
-To resize pools, drag the pill in a gap, or hold Hyper and grab any
+To resize pools, drag the pill in a gap, or hold Caps Lock and grab any
 border, even one a window is covering.
 
 To try portholes that show the whole window, shrunk and updating: ⊞ menu
@@ -79,58 +79,60 @@ the way there.
 
 5. HOW TO SWIM
 --------------
-"Hyper" means holding Control + Option + Command together. There are
-only a few Hyper keys on purpose; everything else is in the ⊞ menu.
+Hold Caps Lock for Scuba's shortcuts. A quick tap is still normal Caps
+Lock, and the light only comes on for a tap. (Prefer Control + Option +
+Command? Turn off "Hold Caps Lock for Hyper" under ⊞ > Settings.) There
+are only a few shortcuts on purpose; everything else is in the ⊞ menu.
 
 Getting in and out
-  Hyper + ↑              Dive in from your normal desktop to Main
-  Hyper + Esc            Surface: back to your normal desktop, windows and all
+  Caps Lock + ↑          Dive in from your normal desktop to Main
+  Caps Lock + Esc        Surface: back to your normal desktop, windows and all
   Three fingers down     Dive into the pool under the pointer
   Three fingers up       Come back up a level
   Three fingers sideways Slide over to the next board on the same level
-  (No trackpad? Hyper + scroll over a pool, and Hyper + ↓ to come back up.)
+  (No trackpad? Caps Lock + scroll over a pool, and Caps Lock + ↓ to come back up.)
 
 Putting windows in place
   Open an app while you're inside, and its window joins the board.
   Drag a window to an edge (of the screen or another window) to dock it.
   Drop it on the middle of another window to tab them together.
-  Hyper + ← / →          Snap the window you're using to that half
-  Hyper + ↑ / ↓          ...then make it the top / bottom quarter
+  Caps Lock + ← / →      Snap the window you're using to that half
+  Caps Lock + ↑ / ↓      ...then make it the top / bottom quarter
   Drag the pill in a gap Resize the windows on either side
 
 Handy extras
-  Hyper + B              Breathing room: an empty corner to dive into.
+  Caps Lock + B          Breathing room: an empty corner to dive into.
                          Leave it empty and it folds away when you go up.
-  Hyper + Y              Tile that breathing room into the board instead
-  Hyper + F              Frost or unfrost a window too small to use
-  Hyper + Shift + 1–9    Save the view on screen; Hyper + 1–9 comes back
-  Hyper + Z              Undo the last layout change
-  Hyper + /              Show every shortcut
+  Caps Lock + Y          Tile that breathing room into the board instead
+  Caps Lock + F          Frost or unfrost a window too small to use
+  Caps Lock + Shift + 1–9    Save the view on screen; Caps Lock + 1–9 comes back
+  Caps Lock + Z          Undo the last layout change
+  Caps Lock + /          Show every shortcut
 
 
 6. HIDING, MOVING, LOCKING AND SAVING
 ------------------------------------
 Hiding things when you zoom out
-  Hyper + H              Hide the window under the pointer from the layer
+  Caps Lock + H          Hide the window under the pointer from the layer
                          above. From above it's gone and its neighbours
                          spread out; dive back down and it's right there.
                          Again shows it.
-  Hyper + Shift + H      The same for the whole pool under the pointer
+  Caps Lock + Shift + H  The same for the whole pool under the pointer
 
 Moving a window anywhere (tabs come along)
-  Hyper + X              Cut the window you're using. A chip at the bottom
+  Caps Lock + X          Cut the window you're using. A chip at the bottom
                          of the screen shows what you're holding.
-  Hyper + C              Copy it instead (pasted, it's in both pools)
-  Hyper + V              Go anywhere, point at a pool and paste it there
+  Caps Lock + C          Copy it instead (pasted, it's in both pools)
+  Caps Lock + V          Go anywhere, point at a pool and paste it there
 
 Locking
-  Hyper + P              Lock this board: nothing docks, snaps or resizes.
+  Caps Lock + P          Lock this board: nothing docks, snaps or resizes.
                          Windows you open meanwhile float on top, like a
                          normal Mac desktop, and stay with this board.
-                         Point at one and press Hyper + P to punch it into
+                         Point at one and press Caps Lock + P to punch it into
                          the tile under it, as a tab.
                          Again unlocks (the floating ones stay floating).
-  Hyper + L              Lock the window under the pointer in place
+  Caps Lock + L          Lock the window under the pointer in place
 
 Saving a pool for later (BETA)
   In the ⊞ menu under Saved pools: save the pool you're in, save it and
