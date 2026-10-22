@@ -132,6 +132,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func locationChanged(_ c: Controller?) {
         updateTitle(c)
+        if let c, !c.onSurface { Coach.shared.note(.dived) } else { Coach.shared.refresh() }
         for map in maps.values { map.refresh() }
     }
     private var dragDock: DragDock!
@@ -289,6 +290,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         updateTitle()
 
         registerHotKeys()
+        // The coach for your first swim: once Scuba's settled in.
+        Coach.shared.isInside = { [weak self] in self.map { !$0.controller.onSurface } ?? false }
+        Coach.shared.screen = { [weak self] in self?.controller.screen }
+        Coach.shared.menuBarRect = { [weak self] in
+            guard let button = self?.statusItem.button, let w = button.window else { return nil }
+            return w.convertToScreen(button.convert(button.bounds, to: nil))
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { Coach.shared.start() }
         dragDock = DragDock(controller: active)
         dragDock.start()
         dividerDrag = DividerDrag(controller: active)
@@ -758,6 +767,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
 
     func menuNeedsUpdate(_ menu: NSMenu) {
+        Coach.shared.note(.menuOpened)
         menu.removeAllItems()
         let c = controller
         let trusted = AXIsProcessTrusted()
@@ -770,6 +780,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         header.isEnabled = false
         menu.addItem(header)
         menu.addItem(ActionItem("Quick guide…") { self.setup.showGettingStarted() })
+        menu.addItem(ActionItem("Show me around") { Coach.shared.restart() })
         menu.addItem(.separator())
 
         // On the Surface (your normal desktop) the menu stays minimal.

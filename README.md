@@ -8,7 +8,7 @@ work at full size and zoom back out to see everything at once.
 
 **[⬇ Download the latest version](../../releases/latest)** · Apple silicon Macs, macOS 14 or newer
 
-> **Beta (0.5).** Expect a few rough edges. Saved pools and live portholes
+> **Beta (0.6).** Expect a few rough edges. Saved pools and live portholes
 > are **BETA** within the beta. Feedback and bug reports are welcome on the
 > [Issues page](../../issues).
 
@@ -45,6 +45,8 @@ work at full size and zoom back out to see everything at once.
   in (Hyper + ↑). Hyper + Esc puts your normal desktop back.
 - **Portholes.** On a nested board, a window too big for its pool shows as
   a picture of itself instead of spilling over its neighbours.
+- **A coach for your first swim.** A small card walks you through the
+  basics one step at a time, ticking each off as you do it.
 - **Breathing room, hiding, saved views, spotlight** and more. See the
   [user guide](docs/USER_GUIDE.md), or **Quick guide…** at the top of
   Scuba's menu.

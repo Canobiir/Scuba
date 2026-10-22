@@ -1,4 +1,4 @@
-WELCOME TO SCUBA  (0.5 beta)
+WELCOME TO SCUBA  (0.6 beta)
 ============================
 
 Scuba lives in your menu bar (the ⊞ icon) and arranges your windows into
@@ -7,7 +7,8 @@ of shuffling windows around one flat screen, you dive down into your work
 and come back up for air.
 
 This is a beta, so a few things may be rough. Thanks for trying it!
-For a quick tour, open the ⊞ menu and choose Quick guide…
+A small coach card walks you through the basics the first time you
+dive in. For a refresher, the ⊞ menu has Quick guide… and Show me around.
 
 You need a Mac with Apple silicon (M1 or newer) on macOS 14 (Sonoma) or
 newer. A trackpad makes it a lot more fun.

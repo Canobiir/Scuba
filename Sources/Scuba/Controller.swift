@@ -1368,6 +1368,14 @@ final class Controller {
         moreInside.show(loose)
         crowd = shelve(crowd)
         shownTiles = crowd
+        // The coach: the first bubble, and the first window that frosts by itself.
+        if let h = loose.first ?? strips.compactMap({ $0.more }).first {
+            Coach.shared.note(.bubbleSeen(MoreInsideHints.spot(in: h.rect)))
+        }
+        if let t = crowd.first(where: { !$0.porthole && $0.cells.isEmpty && $0.badge == nil && $0.window != 0
+                                        && !handFrost.contains($0.panel) }) {
+            Coach.shared.note(.frostSeen(t.rect))
+        }
         if let sp = spotlit, visible.contains(sp) { intended[sp] = spotlightRect }
         fitPortholes(redraw: true, around: intended)
         // Live windows can take a while to reach their real size (Maps is
@@ -2246,6 +2254,12 @@ final class Controller {
         if rooms.isEmpty {
             checkpoint()   // Hyper + Z folds it away again
             placeRoom(on: d, entering: lastRoomTarget ?? screen.frame)
+            // The coach: a room, or a room inside a room.
+            let holder = state.path.last.flatMap { id in desktopStack().dropLast().last?.panel(id: id) }
+            let roomRect = frames(d, in: viewport).first {
+                $0.depth == 0 && $0.panel.scratch == true && $0.panel.windows.isEmpty && $0.panel.desktop == nil
+            }?.rect
+            Coach.shared.note(.roomOpened(roomRect, deeper: holder?.scratch == true))
             Toast.show("Breathing room  ·  drop a window in to give it a tile of its own", seconds: 1.2)
         } else {
             // Folding it away isn't saved for undo: Hyper + B opens it again.
@@ -3587,6 +3601,7 @@ final class Controller {
     }
 
     private func finishSnap(_ w: UInt32, _ p: Panel, _ spot: SnapSpot) {
+        Coach.shared.note(.docked)
         snapped[w] = spot
         spotlit = nil
         state.lastPanelId = p.id
@@ -4818,6 +4833,7 @@ final class Controller {
     /// Makes `w` a tab of pool `p`, in front. Every window there fills the
     /// pool (tabs don't float).
     private func makeTab(_ w: UInt32, in p: Panel) {
+        Coach.shared.note(.tabbed)
         if !p.windows.contains(w) { p.windows.append(w) }
         for x in p.windows { p.setFloat(x, nil) }
         p.tabs = true
@@ -5161,6 +5177,10 @@ final class Controller {
             glideLayout()   // it glides back to its tile
             return
         }
+        switch target.action {
+        case .float, .desktop, .tab: break   // (tabs tell the coach themselves)
+        default: Coach.shared.note(.docked)
+        }
         onTop.remove(window)
         // Placing a window that's in Spotlight (a new one, say) ends Spotlight.
         if spotlit == window { spotlit = nil }
@@ -5298,6 +5318,7 @@ final class Controller {
     /// that really is too small to use frosts again.
     func toggleFrostHere() {
         guard !onSurface, !busy else { return }
+        Coach.shared.note(.frostToggled)
         let point = NSEvent.mouseLocation
         let placedAll = frames(current, in: viewport)
         if let t = shownTiles.first(where: { $0.rect.contains(point) }),
