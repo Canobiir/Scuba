@@ -1,0 +1,145 @@
+WELCOME TO SCUBA  (0.5 beta)
+============================
+
+Scuba lives in your menu bar (the ⊞ icon) and arranges your windows into
+pools. Any pool can open up into a whole desktop of its own, so instead
+of shuffling windows around one flat screen, you dive down into your work
+and come back up for air.
+
+This is a beta, so a few things may be rough. Thanks for trying it!
+For a quick tour, open the ⊞ menu and choose Quick guide…
+
+You need a Mac with Apple silicon (M1 or newer) on macOS 14 (Sonoma) or
+newer. A trackpad makes it a lot more fun.
+
+
+1. INSTALL
+----------
+1. Drag Scuba into your Applications folder.
+2. Double-click it. macOS will say it can't check the app for malware,
+   because test builds don't come from the App Store. Click Done.
+3. Open System Settings › Privacy & Security, scroll down, and click
+   "Open Anyway" next to the message about Scuba. Confirm with your
+   password or Touch ID.
+
+   If macOS says the app is "damaged", open Terminal, paste this line and
+   press Return, then open Scuba again:
+
+       xattr -dr com.apple.quarantine /Applications/Scuba.app
+
+
+2. PERMISSIONS
+--------------
+A Setup window opens the first time.
+
+- Accessibility (needed): click "Turn On…", then switch Scuba on in the list.
+  Scuba restarts by itself.
+- Screen Recording (optional): this only powers the smooth zoom animation.
+  Switch it on, then click "Restart App".
+- Your browser (later): the first time you save a pool with Safari or
+  Chrome in it, macOS asks whether Scuba may control that browser. Choose
+  Allow. That's how Scuba remembers your tabs. The tabs aren't saved that
+  first time, so save the pool again once you've allowed it.
+
+You can reopen Setup anytime from the ⊞ menu.
+
+
+3. ONE TRACKPAD SETTING
+-----------------------
+Scuba uses three-finger swipes, and so does macOS. Go to System Settings ›
+Trackpad › More Gestures and set "Swipe between full-screen applications"
+and "Mission Control" to four fingers. Then three fingers are Scuba's.
+
+
+4. SMALLER SCREENS (13" AND 14" MACBOOKS)
+-----------------------------------------
+Most apps won't shrink below a certain window size, so on a smaller
+screen, pools inside pools quickly get too small to hold real windows.
+Those windows show as portholes instead: a frosted picture of the
+window, cropped at its pool's edge. Click one to dive to its board, or
+Hyper + click it to blow the window up right where you are.
+
+To try portholes that show the whole window, shrunk and updating: ⊞ menu
+› Settings › Windows & pools › Windows too big for a nested pool ›
+Live portholes (BETA).
+
+For more room for real, usable windows, run your display at its highest
+resolution with BetterDisplay (github.com/waydabber/BetterDisplay).
+Everything on screen gets smaller, but nested pools fit more real
+windows. On a MacBook's built-in screen, the highest resolutions may
+need BetterDisplay Pro, which has a 14-day free trial.
+
+No install? System Settings › Displays › "More Space" gets you part of
+the way there.
+
+
+5. HOW TO SWIM
+--------------
+"Hyper" means holding Control + Option + Command together. There are
+only a few Hyper keys on purpose; everything else is in the ⊞ menu.
+
+Getting in and out
+  Hyper + ↑              Dive in from your normal desktop to Main
+  Hyper + Esc            Surface: back to your normal desktop, windows and all
+  Three fingers down     Dive into the pool under the pointer
+  Three fingers up       Come back up a level
+  Three fingers sideways Slide over to the next board on the same level
+  (No trackpad? Hyper + scroll over a pool, and Hyper + ↓ to come back up.)
+
+Putting windows in place
+  Open an app while you're inside, and its window joins the board.
+  Drag a window to an edge (of the screen or another window) to dock it.
+  Drop it on the middle of another window to tab them together.
+  Hyper + ← / →          Snap the window you're using to that half
+  Hyper + ↑ / ↓          ...then make it the top / bottom quarter
+  Drag the pill in a gap Resize the windows on either side
+
+Handy extras
+  Hyper + B              Breathing room: an empty corner to dive into.
+                         Leave it empty and it folds away when you go up.
+  Hyper + Y              Tile that breathing room into the board instead
+  Hyper + F              Frost or unfrost a window too small to use
+  Hyper + Shift + 1–9    Save the view on screen; Hyper + 1–9 comes back
+  Hyper + Z              Undo the last layout change
+  Hyper + /              Show every shortcut
+
+
+6. HIDING, MOVING, LOCKING AND SAVING
+------------------------------------
+Hiding things when you zoom out
+  Hyper + H              Hide the window under the pointer from the layer
+                         above. From above it's gone and its neighbours
+                         spread out; dive back down and it's right there.
+                         Again shows it.
+  Hyper + Shift + H      The same for the whole pool under the pointer
+
+Moving a window anywhere (tabs come along)
+  Hyper + X              Cut the window you're using. A chip at the bottom
+                         of the screen shows what you're holding.
+  Hyper + C              Copy it instead (pasted, it's in both pools)
+  Hyper + V              Go anywhere, point at a pool and paste it there
+
+Locking
+  Hyper + P              Lock this board: nothing docks, snaps or resizes,
+                         and new windows float on top. Again unlocks.
+  Hyper + L              Lock the window under the pointer in place
+
+Saving a pool for later (BETA)
+  In the ⊞ menu under Saved pools: save the pool you're in, save it and
+  close it, or open a saved one into an empty pool. Each app opens and its
+  window lands where it was. Browsers come back with their tabs; other apps
+  open a fresh window in the right spot.
+
+
+7. GETTING OUT
+--------------
+⊞ menu › Quit Scuba puts every window back where you can see it. If
+anything gets weird, quit and reopen it.
+
+
+8. TELL MICHAEL
+---------------
+- What felt confusing at first?
+- Did diving in feel like going *into* something?
+- Did saving a pool and opening it again bring everything back?
+- Anything that broke, and what you were doing when it happened.
